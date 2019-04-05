@@ -1,6 +1,6 @@
 {
-  "name": "react-native-side-menu",
-  "version": "1.1.3",
+  "name": "react-native-side-menu-fixed-width",
+  "version": "1.0.0",
   "description": "Simple customizable component to create side menu",
   "main": "build/index.js",
   "scripts": {
@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:react-native-community/react-native-side-menu.git"
+    "url": "git@github.com:SUVO-DEV/react-native-side-menu.git"
   },
   "keywords": [
     "react-native",
@@ -17,12 +17,9 @@
     "ios",
     "sidebar"
   ],
-  "author": "Alexey Kureev <kureev-mail@ya.ru> (https://github.com/Kureev)",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/react-native-community/react-native-side-menu/issues"
-  },
-  "homepage": "https://github.com/react-native-community/react-native-side-menu",
+  "author": "Jack Williams <jackw3434@gmail.com>",
+  "license": "MIT",  
+  "homepage": "https://github.com/SUVO-DEV/react-native-side-menu",
   "dependencies": {
     "prop-types": "^15.5.10"
   },
