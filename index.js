@@ -25,7 +25,6 @@ type Props = {
   hiddenMenuOffset: number,
   disableGestures: Function | bool,
   animationFunction: Function,
-  onAnimationComplete: Function,
   onStartShouldSetResponderCapture: Function,
   isOpen: bool,
   bounceBackOnOverdraw: bool,
@@ -74,10 +73,8 @@ export default class SideMenu extends React.Component {
 
     this.prevLeft = 0;
     this.isOpen = !!props.isOpen;
-
+  
     const initialMenuPositionMultiplier = props.menuPosition === 'right' ? -1 : 1;
-    const openOffsetMenuPercentage = props.openMenuOffset / deviceScreen.width;
-    const hiddenMenuOffsetPercentage = props.hiddenMenuOffset / deviceScreen.width;
     const left: Animated.Value = new Animated.Value(
       props.isOpen
         ? props.openMenuOffset * initialMenuPositionMultiplier
@@ -94,14 +91,12 @@ export default class SideMenu extends React.Component {
     this.state = {
       width: deviceScreen.width,
       height: deviceScreen.height,
-      openOffsetMenuPercentage,
-      openMenuOffset: deviceScreen.width * openOffsetMenuPercentage,
-      hiddenMenuOffsetPercentage,
-      hiddenMenuOffset: deviceScreen.width * hiddenMenuOffsetPercentage,
+      openMenuOffset: props.openMenuOffset,
+      hiddenMenuOffset: props.hiddenMenuOffset,
       left,
     };
 
-    this.state.left.addListener(({value}) => this.props.onSliding(Math.abs((value - this.state.hiddenMenuOffset) / (this.state.openMenuOffset - this.state.hiddenMenuOffset))));
+    this.state.left.addListener(({ value }) => this.props.onSliding(Math.abs((value - this.state.hiddenMenuOffset) / (this.state.openMenuOffset - this.state.hiddenMenuOffset))));
   }
 
   componentWillMount(): void {
@@ -117,14 +112,23 @@ export default class SideMenu extends React.Component {
   componentWillReceiveProps(props: Props): void {
     if (typeof props.isOpen !== 'undefined' && this.isOpen !== props.isOpen && (props.autoClosing || this.isOpen === false)) {
       this.openMenu(props.isOpen);
+    
     }
   }
 
-  onLayoutChange(e: Event) {
+  onLayoutChange(e) {
+    this.prevLeft = 0;
+
     const { width, height } = e.nativeEvent.layout;
-    const openMenuOffset = width * this.state.openOffsetMenuPercentage;
-    const hiddenMenuOffset = width * this.state.hiddenMenuOffsetPercentage;
-    this.setState({ width, height, openMenuOffset, hiddenMenuOffset });
+    const initialMenuPositionMultiplier = this.props.menuPosition === 'right' ? -1 : 1;
+    const openMenuOffset = this.props.openMenuOffset;
+    const hiddenMenuOffset = this.props.hiddenMenuOffset;
+    const left = new Animated.Value(
+      this.isOpen
+        ? this.props.openMenuOffset * initialMenuPositionMultiplier
+        : this.props.hiddenMenuOffset,
+    );
+    this.setState({ width, height, openMenuOffset, hiddenMenuOffset, left });    
   }
 
   /**
@@ -134,7 +138,7 @@ export default class SideMenu extends React.Component {
   getContentView() {
     let overlay: React.Element<void, void> = null;
 
-    if (this.isOpen) {
+    if (this.isOpen) {     
       overlay = (
         <TouchableWithoutFeedback onPress={() => this.openMenu(false)}>
           <View style={styles.overlay} />
@@ -163,7 +167,7 @@ export default class SideMenu extends React.Component {
 
     this.props
       .animationFunction(this.state.left, newOffset)
-      .start(this.props.onAnimationComplete);
+      .start();
 
     this.prevLeft = newOffset;
   }
@@ -219,8 +223,8 @@ export default class SideMenu extends React.Component {
     this.moveLeft(isOpen ? openMenuOffset : hiddenMenuOffset);
     this.isOpen = isOpen;
 
-    this.forceUpdate();
     this.props.onChange(isOpen);
+    this.forceUpdate();  
   }
 
   gesturesAreEnabled(): boolean {
@@ -270,7 +274,6 @@ SideMenu.propTypes = {
   animationStyle: PropTypes.func,
   disableGestures: PropTypes.oneOfType([PropTypes.func, PropTypes.bool]),
   animationFunction: PropTypes.func,
-  onAnimationComplete: PropTypes.func,
   onStartShouldSetResponderCapture: PropTypes.func,
   isOpen: PropTypes.bool,
   bounceBackOnOverdraw: PropTypes.bool,
@@ -287,10 +290,10 @@ SideMenu.defaultProps = {
   disableGestures: false,
   menuPosition: 'left',
   hiddenMenuOffset: 0,
-  onMove: () => {},
+  onMove: () => { },
   onStartShouldSetResponderCapture: () => true,
-  onChange: () => {},
-  onSliding: () => {},
+  onChange: () => { },
+  onSliding: () => { },
   animationStyle: value => ({
     transform: [{
       translateX: value,
@@ -300,7 +303,6 @@ SideMenu.defaultProps = {
     toValue: value,
     friction: 8,
   }),
-  onAnimationComplete: () => {},
   isOpen: false,
   bounceBackOnOverdraw: true,
   autoClosing: true,
